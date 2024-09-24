@@ -25,6 +25,7 @@
   let currentDate = new Date();
   let formattedDate = currentDate.toLocaleDateString();
   let formattedTime = currentDate.toLocaleTimeString();
+  let currentDateString = currentDate.toLocaleDateString('en-CA');
 
   setInterval(() => {
     currentDate = new Date();
@@ -78,13 +79,126 @@
     }
   }
 
-  // Summary updates (mock for now)
-  let totalSpent = todayActivities.reduce((acc, log) => log.type === 'Expense' ? acc + log.amount : acc, 0);
-  let totalInvested = todayActivities.reduce((acc, log) => log.type === 'Investment' ? acc + log.amount : acc, 0);
+  //---------------------------- Previous Entries Page ------------------------------
 
-  function updateSummary() {
-    totalSpent = todayActivities.reduce((acc, log) => log.type === 'Expense' ? acc + log.amount : acc, 0);
-    totalInvested = todayActivities.reduce((acc, log) => log.type === 'Investment' ? acc + log.amount : acc, 0);
+  let selectedDayEntries = [];  // Entries for the selected day
+  let editingEntry = null;  // Tracks which entry is being edited
+
+  // Mock data for previous entries
+  let entries = [
+    {
+      date: "2024-09-20",
+      logs: [
+        { type: 'Expense', amount: 50, description: 'Lunch' },
+        { type: 'Investment', amount: 200, description: 'Stocks' }
+      ]
+    },
+    {
+      date: "2024-09-21",
+      logs: [
+        { type: 'Expense', amount: 30, description: 'Gas' },
+        { type: 'Savings', amount: 100, description: 'Savings Deposit' }
+      ]
+    }
+  ];
+
+  // Load entries for the currently selected day
+  function loadEntriesForDay() {
+    const entryForDay = entries.find(entry => entry.date === currentDateString);
+    selectedDayEntries = entryForDay ? entryForDay.logs : [];
+  }
+
+  // Edit an entry
+  function editEntry(index) {
+    editingEntry = index;
+  }
+
+  // Save the edited entry
+  function saveEntry(index) {
+    editingEntry = null;
+    alert('Entry updated successfully!');
+  }
+
+  // Navigate to the previous day
+  function prevDay() {
+    currentDate.setDate(currentDate.getDate() - 1);
+    currentDateString = currentDate.toISOString().split('T')[0];  // Correct date format
+    loadEntriesForDay();
+  }
+
+  // Navigate to the next day
+  function nextDay() {
+    currentDate.setDate(currentDate.getDate() + 1);
+    currentDateString = currentDate.toISOString().split('T')[0];  // Correct date format
+    loadEntriesForDay();
+  }
+
+  // Initialize page with current day entries
+  loadEntriesForDay();
+  
+  
+  
+  //---------------------------- Summary Page ------------------------------
+  // Summary updates (mock for now)
+  // Data for user goals
+  let userGoals = [
+    { activity: 'Expense', target: 1000 },
+    { activity: 'Savings', target: 500 },
+    { activity: 'Investment', target: 300 }
+  ];
+
+  // Mock data for logs
+  let logs = [
+    { type: 'Expense', amount: 200, date: '2024-09-20' },
+    { type: 'Savings', amount: 100, date: '2024-09-21' },
+    { type: 'Investment', amount: 50, date: '2024-09-22' }
+  ];
+
+  let availableActivities = ['Expense', 'Savings', 'Investment', 'Yoga', 'Water Intake'];
+  let selectedActivities = ['Expense', 'Savings', 'Investment']; // Initially selected
+
+  let showSuccessMessage = false; // To show success message upon saving goals/customization
+
+  // Save goals
+  function saveGoals() {
+    showSuccessMessage = true;
+    setTimeout(() => {
+      showSuccessMessage = false;
+    }, 3000); // Hide success message after 3 seconds
+  }
+
+  // Calculate progress toward goals (mock logic for now)
+  function calculateGoalProgress(goal) {
+    let loggedAmount = logs
+      .filter(log => log.type === goal.activity)
+      .reduce((acc, log) => acc + log.amount, 0);
+    return (loggedAmount / goal.target) * 100; // Return percentage
+  }
+
+  // Mock summary data (average expenses, savings, etc.)
+  let totalLogs = logs.length;
+  let averageExpenses = logs
+    .filter(log => log.type === 'Expense')
+    .reduce((acc, log) => acc + log.amount, 0) / totalLogs;
+  let averageSavings = logs
+    .filter(log => log.type === 'Savings')
+    .reduce((acc, log) => acc + log.amount, 0) / totalLogs;
+
+  // Toggle activity selection
+  function toggleActivity(activity) {
+    if (selectedActivities.includes(activity)) {
+      selectedActivities = selectedActivities.filter(a => a !== activity);
+    } else {
+      selectedActivities.push(activity);
+    }
+  }
+
+  // Save customization
+  function saveCustomization() {
+    showSuccessMessage = true;
+    setTimeout(() => {
+      showSuccessMessage = false;
+    }, 3000);
   }
 
 </script>
@@ -186,16 +300,111 @@
     </section>
   {/if}
 
+  {#if currentPage === 'entries'}
+  <!-- Previous Entries Page -->
+  <section>
+    <h2>Previous Financial Entries</h2>
+
+    <!-- Navigation for Previous/Next days -->
+    <div class="nav-buttons">
+      <button on:click={prevDay} class="btn-nav">Previous Day</button>
+      <span>{currentDateString}</span>
+      <button on:click={nextDay} class="btn-nav">Next Day</button>
+    </div>
+
+    <!-- Display entries for the selected day -->
+    {#if selectedDayEntries.length > 0}
+      <div class="entries-grid">
+        {#each selectedDayEntries as entry, index}
+          <div class="entry-tile">
+            {#if editingEntry === index}
+              <!-- Edit mode for the entry -->
+              <input type="text" bind:value={entry.description} class="form-control" placeholder="Description"/>
+              <input type="number" bind:value={entry.amount} class="form-control" placeholder="Amount"/>
+              <select bind:value={entry.type} class="form-control">
+                <option value="Expense">Expense</option>
+                <option value="Investment">Investment</option>
+                <option value="Savings">Savings</option>
+              </select>
+              <button class="btn-save" on:click={() => saveEntry(index)}>Save</button>
+            {:else}
+              <!-- Display mode for the entry -->
+              <p><strong>{entry.type}</strong>: ${entry.amount}</p>
+              <p>{entry.description}</p>
+              <button class="btn-edit" on:click={() => editEntry(index)}>Edit</button>
+            {/if}
+          </div>
+        {/each}
+      </div>
+    {:else}
+      <p>No entries found for this day.</p>
+    {/if}
+  </section>
+  {/if}
+  
+
   {#if currentPage === 'summary'}
-    <!-- Summary Page -->
-    <section>
-      <h2>Your Financial Goals & Summary</h2>
+  <section>
+    <h2>Goals & Summary</h2>
+
+    <!-- Goal Setting Section -->
+    <div class="goal-setting">
+      <h3>Set Your Goals</h3>
+      <div class="goal-entry">
+        {#each userGoals as goal, index}
+          <div class="goal-tile">
+            <label>{goal.activity} Goal:</label>
+            <input type="number" placeholder="Set goal" bind:value="{goal.target}" class="form-control" />
+          </div>
+        {/each}
+      </div>
+      <button class="btn-save-goals" on:click={saveGoals}>Save Goals</button>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="summary-section">
+      <h3>Performance Overview</h3>
+
+      {#each userGoals as goal}
+        <div class="summary-tile">
+          <h4>{goal.activity} Progress</h4>
+          <progress max="100" value="{calculateGoalProgress(goal)}"></progress>
+          <p>{goal.activity} Target: ${goal.target}</p>
+          <p>Progress: ${calculateGoalProgress(goal)}%</p>
+        </div>
+      {/each}
+
+      <!-- Additional performance overview such as averages and frequency of logging -->
+      <h4>Overall Activity Summary</h4>
+      <p>Total Activities Logged: {totalLogs}</p>
+      <p>Average Expenses: ${averageExpenses}</p>
+      <p>Average Savings: ${averageSavings}</p>
+    </div>
+
+    <!-- Customization Section -->
+    <div class="customization">
+      <h3>Customize Activities</h3>
+
+      <h4>Available Activities</h4>
       <ul>
-        <li>Total Spent: ${totalSpent}</li>
-        <li>Total Invested: ${totalInvested}</li>
+        {#each availableActivities as activity}
+          <li>
+            <input type="checkbox" checked={selectedActivities.includes(activity)} on:change={() => toggleActivity(activity)} /> 
+            {activity}
+          </li>
+        {/each}
       </ul>
-      <button on:click={updateSummary}>Update Overview</button>
-    </section>
+
+      <button class="btn-save-customization" on:click={saveCustomization}>Save Customization</button>
+    </div>
+
+    <!-- Success Message -->
+    {#if showSuccessMessage}
+      <div class="success-message">
+        Your goals and settings have been updated successfully!
+      </div>
+    {/if}
+  </section>
   {/if}
 
   {#if currentPage === 'settings'}
@@ -214,10 +423,6 @@
     box-sizing: border-box;
   }
 
-  body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #f4f4f4;
-  }
 
   .sidebar {
     background-color: #191414;
@@ -262,11 +467,6 @@
   .sidebar li:hover {
     color: #1db954;
     text-shadow: 0 0 6px rgba(29, 185, 84, 0.8);
-  }
-
-  .sidebar li.active { 
-    color: #1db954;
-    font-weight: bold;
   }
 
   .main-content {
@@ -328,7 +528,7 @@
     margin: 20px auto;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 25px;
   }
 
   /* Form Group for each input field */
@@ -338,13 +538,7 @@
   }
 
   /* General input field styling */
-  .form-control {
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-top: 5px;
-  }
+
 
   /* Button styling */
   .btn-log {
@@ -362,6 +556,125 @@
     background-color: #148f3d;
   }
 
+  
+
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 18px;
+  }
+
+  .btn-nav {
+    background-color: #1db954;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-nav:hover {
+    background-color: #148f3d;
+  }
+
+  .entries-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+  }
+
+  .entry-tile {
+    background-color: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 250px;
+    text-align: center;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+
+  .btn-edit, .btn-save {
+    background-color: #1db954;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .btn-edit:hover, .btn-save:hover {
+    background-color: #148f3d;
+  }
+
+  section h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+
+  p {
+    margin: 10px 0;
+  }
+
+  section {
+    padding: 20px;
+    text-align: center;
+  }
+
+  .goal-setting, .summary-section, .customization {
+    margin-bottom: 40px;
+  }
+
+  .goal-entry {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .goal-tile {
+    background-color: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    text-align: center;
+  }
+
+  .summary-tile {
+    background-color: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 10px 0;
+  }
+
+  .btn-save-goals, .btn-save-customization {
+    background-color: #1db954;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-save-goals:hover, .btn-save-customization:hover {
+    background-color: #148f3d;
+  }
+
   .success-message {
     background-color: #d4edda;
     color: #155724;
@@ -371,11 +684,5 @@
     text-align: center;
     margin-top: 20px;
     transition: opacity 0.5s ease;
-  }
-
-  /* Align text and center heading */
-  section h2 {
-    text-align: center;
-    margin-bottom: 20px;
   }
 </style>
