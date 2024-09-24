@@ -40,7 +40,7 @@
   // Activity log data stored temporarily
   let todayActivities = [
     { type: 'Expense', amount: 100, description: 'Groceries' },
-    { type: 'Investment', amount: 200, description: 'Stock Purchase' }
+    { type: 'Investment', amount: 300, description: 'Stock Purchase' }
   ];
 
   let hasLoggedToday = todayActivities.length > 0;
@@ -90,7 +90,7 @@
       date: "2024-09-20",
       logs: [
         { type: 'Expense', amount: 50, description: 'Lunch' },
-        { type: 'Investment', amount: 200, description: 'Stocks' }
+        { type: 'Investment', amount: 300, description: 'Stocks' }
       ]
     },
     {
@@ -144,7 +144,7 @@
   let userGoals = [
     { activity: 'Expense', target: 1000 },
     { activity: 'Savings', target: 500 },
-    { activity: 'Investment', target: 300 }
+    { activity: 'Investment', target: 500 }
   ];
 
   // Mock data for logs
@@ -154,7 +154,7 @@
     { type: 'Investment', amount: 50, date: '2024-09-22' }
   ];
 
-  let availableActivities = ['Expense', 'Savings', 'Investment', 'Yoga', 'Water Intake'];
+  let availableActivities = ['Expense', 'Savings', 'Investment'];
   let selectedActivities = ['Expense', 'Savings', 'Investment']; // Initially selected
 
   let showSuccessMessage = false; // To show success message upon saving goals/customization
@@ -201,6 +201,18 @@
     }, 3000);
   }
 
+  let isDarkTheme = false; // Default is light theme
+
+  function toggleTheme() {
+    if (isDarkTheme) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  }
+
+  // Watch for changes in isDarkTheme and apply the theme
+  $: toggleTheme();
 </script>
 
 <!-- Header -->
@@ -226,34 +238,47 @@
 <!-- Main Content Area -->
 <main class="main-content">
   {#if currentPage === 'dashboard'}
-    <!-- Dashboard Content -->
-    <div class="dashboard-grid">
-      <div class="tile">
-        <i class="fas fa-user"></i>
-        <h3>User Overview</h3>
-        <p>Name: {userName}</p>
-        <p>Days Since Start: {daysSinceStart}</p>
-        <p>Days Active: {daysActive}</p>
-      </div>
+  <!-- Dashboard Content -->
+  <div class="dashboard-grid">
+    <!-- User Overview Tile -->
+    <div class="tile">
+      <i class="fas fa-user"></i>
+      <h3>User Overview</h3>
+      <p>Name: {userName}</p>
+      <p>Days Since Start: {daysSinceStart}</p>
+      <p>Days Active: {daysActive}</p>
+    </div>
     
-      <div class="tile">
-        <i class="fas fa-clock"></i>
-        <h3>Current Date & Time</h3>
-        <p>Date: {formattedDate}</p>
-        <p>Time: {formattedTime}</p>
-      </div>
-    
-      <div class="tile">
-        <i class="fas fa-tasks"></i>
-        <h3>Today's Activities</h3>
-        {#each todayActivities as activity}
-          <p>{activity.type}: ${activity.amount} - {activity.description}</p>
-        {/each}
-        {#if hasLoggedToday}
-          <p class="completed">You've completed your logging for today! <i class="fas fa-check-circle"></i></p>
-        {/if}
-      </div>
-    </div>  
+    <!-- Date/Time Tile -->
+    <div class="tile">
+      <i class="fas fa-clock"></i>
+      <h3>Current Date & Time</h3>
+      <p>Date: {formattedDate}</p>
+      <p>Time: {formattedTime}</p>
+    </div>
+
+    <!-- Today's Activities Tile -->
+    <div class="tile">
+      <i class="fas fa-tasks"></i>
+      <h3>Today's Activities</h3>
+      {#each todayActivities as activity}
+        <p>{activity.type}: ${activity.amount} - {activity.description}</p>
+      {/each}
+      {#if hasLoggedToday}
+        <p class="completed">You've completed your logging for today! <i class="fas fa-check-circle"></i></p>
+      {/if}
+    </div>
+
+    <!-- Goals & Summary Preview Tile -->
+    <div class="tile">
+      <i class="fas fa-chart-line"></i>
+      <h3>Goals Overview</h3>
+      {#each userGoals as goal}
+        <p><strong>{goal.activity}</strong>: {calculateGoalProgress(goal)}% complete</p>
+      {/each}
+      <button class="btn-goals" on:click={() => navigate('summary')}>View Full Summary</button>
+    </div>
+  </div>
   {/if}
 
   {#if currentPage === 'log'}
@@ -408,10 +433,16 @@
   {/if}
 
   {#if currentPage === 'settings'}
-    <!-- Settings Page -->
-    <section>
-      <h2>Settings</h2>
-    </section>
+  <!-- Settings Page -->
+  <section>
+    <h2>Settings</h2>
+
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+      <label for="themeSwitch">Toggle Theme</label>
+      <input type="checkbox" id="themeSwitch" bind:checked={isDarkTheme} on:change={toggleTheme} />
+    </div>
+  </section>
   {/if}
 
 </main>
@@ -421,6 +452,14 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+  }
+
+  :root {
+    --background-color: #ffffff;
+    --text-color: #000000;
+    --tile-background-color: #f4f4f4;
+    --button-background-color: #1db954;
+    --button-text-color: #ffffff;
   }
 
 
@@ -685,4 +724,60 @@
     margin-top: 20px;
     transition: opacity 0.5s ease;
   }
+
+  /* Dark theme overrides */
+  [data-theme="dark"] {
+    --background-color: #121212;
+    --text-color: #f0f0f0;
+    --tile-background-color: #333333;
+    --button-background-color: #1db954;
+    --button-text-color: #ffffff;
+  }
+
+  /* Apply theme variables */
+  body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  input[type="checkbox"] {
+    width: 40px;
+    height: 20px;
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: #c6c6c6;
+    border-radius: 10px;
+    position: relative;
+    outline: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  input[type="checkbox"]:checked {
+    background-color: #1db954;
+  }
+
+  input[type="checkbox"]:before {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: white;
+    top: 1px;
+    left: 1px;
+    transition: 0.3s;
+  }
+
+  input[type="checkbox"]:checked:before {
+    transform: translateX(20px);
+  }
+
 </style>
