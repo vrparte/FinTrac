@@ -123,7 +123,6 @@
     loadEntriesForDay();
   }
 
-  // Initialize page with current day entries
   loadEntriesForDay();
   
   
@@ -161,7 +160,7 @@
     let loggedAmount = logs
       .filter(log => log.type === goal.activity)
       .reduce((acc, log) => acc + log.amount, 0);
-    return (loggedAmount / goal.target) * 100; // Return percentage
+    return (loggedAmount / goal.target) * 100; 
   }
 
   
