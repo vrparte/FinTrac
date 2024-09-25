@@ -8,11 +8,11 @@
   let currentPage = 'dashboard';
   let activePage = currentPage;
 
-  let selectedActivityType = "Expense";  // Default activity type
-  let amount = 0; // Variable to store the amount entered by the user
-  let description = ""; // New description variable for activities
-  let image = null; // Variable to hold the uploaded image
-  let showMessage = false; // Controls the display of the success message
+  let selectedActivityType = "Expense";
+  let amount = 0; 
+  let description = ""; 
+  let image = null; 
+  let showMessage = false; 
 
   function navigate(page) {
     currentPage = page;
@@ -37,7 +37,6 @@
   let daysSinceStart = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24)); 
   let daysActive = 30; 
 
-  // Activity log data stored temporarily
   let todayActivities = [
     { type: 'Expense', amount: 100, description: 'Groceries' },
     { type: 'Investment', amount: 300, description: 'Stock Purchase' }
@@ -54,23 +53,19 @@
 
   function logActivity() {
     if (amount > 0 && description.trim() !== "") {
-      // Log the activity
       todayActivities.push({ 
         type: selectedActivityType, 
         amount: Number(amount), 
         description: description, 
-        image: image ? image.name : null // Store the image name if provided
+        image: image ? image.name : null 
       });
 
-      // Reset input fields
       amount = 0;
       description = "";
       image = null;
 
-      // Show the success message
       showMessage = true;
 
-      // Hide the message after a few seconds
       setTimeout(() => {
         showMessage = false;
       }, 3000);
@@ -81,10 +76,9 @@
 
   //---------------------------- Previous Entries Page ------------------------------
 
-  let selectedDayEntries = [];  // Entries for the selected day
-  let editingEntry = null;  // Tracks which entry is being edited
+  let selectedDayEntries = [];  
+  let editingEntry = null;  
 
-  // Mock data for previous entries
   let entries = [
     {
       date: "2024-09-20",
@@ -102,31 +96,27 @@
     }
   ];
 
-  // Load entries for the currently selected day
   function loadEntriesForDay() {
     const entryForDay = entries.find(entry => entry.date === currentDateString);
     selectedDayEntries = entryForDay ? entryForDay.logs : [];
   }
 
-  // Edit an entry
   function editEntry(index) {
     editingEntry = index;
   }
 
-  // Save the edited entry
   function saveEntry(index) {
     editingEntry = null;
     alert('Entry updated successfully!');
   }
 
-  // Navigate to the previous day
   function prevDay() {
     currentDate.setDate(currentDate.getDate() - 1);
     currentDateString = currentDate.toISOString().split('T')[0];  // Correct date format
     loadEntriesForDay();
   }
 
-  // Navigate to the next day
+
   function nextDay() {
     currentDate.setDate(currentDate.getDate() + 1);
     currentDateString = currentDate.toISOString().split('T')[0];  // Correct date format
@@ -139,15 +129,14 @@
   
   
   //---------------------------- Summary Page ------------------------------
-  // Summary updates (mock for now)
-  // Data for user goals
+
   let userGoals = [
     { activity: 'Expense', target: 1000 },
     { activity: 'Savings', target: 500 },
     { activity: 'Investment', target: 500 }
   ];
 
-  // Mock data for logs
+  
   let logs = [
     { type: 'Expense', amount: 200, date: '2024-09-20' },
     { type: 'Savings', amount: 100, date: '2024-09-21' },
@@ -155,19 +144,19 @@
   ];
 
   let availableActivities = ['Expense', 'Savings', 'Investment'];
-  let selectedActivities = ['Expense', 'Savings', 'Investment']; // Initially selected
+  let selectedActivities = ['Expense', 'Savings', 'Investment']; 
 
-  let showSuccessMessage = false; // To show success message upon saving goals/customization
+  let showSuccessMessage = false; 
 
-  // Save goals
+  
   function saveGoals() {
     showSuccessMessage = true;
     setTimeout(() => {
       showSuccessMessage = false;
-    }, 3000); // Hide success message after 3 seconds
+    }, 3000);
   }
 
-  // Calculate progress toward goals (mock logic for now)
+  
   function calculateGoalProgress(goal) {
     let loggedAmount = logs
       .filter(log => log.type === goal.activity)
@@ -175,7 +164,7 @@
     return (loggedAmount / goal.target) * 100; // Return percentage
   }
 
-  // Mock summary data (average expenses, savings, etc.)
+  
   let totalLogs = logs.length;
   let averageExpenses = logs
     .filter(log => log.type === 'Expense')
@@ -184,7 +173,7 @@
     .filter(log => log.type === 'Savings')
     .reduce((acc, log) => acc + log.amount, 0) / totalLogs;
 
-  // Toggle activity selection
+  
   function toggleActivity(activity) {
     if (selectedActivities.includes(activity)) {
       selectedActivities = selectedActivities.filter(a => a !== activity);
@@ -193,7 +182,7 @@
     }
   }
 
-  // Save customization
+  
   function saveCustomization() {
     showSuccessMessage = true;
     setTimeout(() => {
@@ -201,7 +190,7 @@
     }, 3000);
   }
 
-  let isDarkTheme = false; // Default is light theme
+  let isDarkTheme = false; 
 
   function toggleTheme() {
     if (isDarkTheme) {
@@ -211,16 +200,16 @@
     }
   }
 
-  // Watch for changes in isDarkTheme and apply the theme
+  
   $: toggleTheme();
 </script>
 
-<!-- Header -->
+
 <header class="page-header">
   <h1>{currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}</h1> 
 </header>
 
-<!-- Sidebar -->
+
 <aside class="sidebar">
   <div class="sidebar-logo">
     <span>Fin</span>Trac
@@ -235,12 +224,9 @@
   </ul>
 </aside>
 
-<!-- Main Content Area -->
 <main class="main-content">
   {#if currentPage === 'dashboard'}
-  <!-- Dashboard Content -->
   <div class="dashboard-grid">
-    <!-- User Overview Tile -->
     <div class="tile">
       <i class="fas fa-user"></i>
       <h3>User Overview</h3>
@@ -249,7 +235,6 @@
       <p>Days Active: {daysActive}</p>
     </div>
     
-    <!-- Date/Time Tile -->
     <div class="tile">
       <i class="fas fa-clock"></i>
       <h3>Current Date & Time</h3>
@@ -257,7 +242,7 @@
       <p>Time: {formattedTime}</p>
     </div>
 
-    <!-- Today's Activities Tile -->
+
     <div class="tile">
       <i class="fas fa-tasks"></i>
       <h3>Today's Activities</h3>
@@ -269,7 +254,6 @@
       {/if}
     </div>
 
-    <!-- Goals & Summary Preview Tile -->
     <div class="tile">
       <i class="fas fa-chart-line"></i>
       <h3>Goals Overview</h3>
@@ -282,11 +266,9 @@
   {/if}
 
   {#if currentPage === 'log'}
-    <!-- Log Activity Page -->
     <section>
       <h2>Log Your Financial Activities</h2>
   
-      <!-- Log form tile -->
       <div class="log-tile">
         <div class="form-group">
           <label for="activityType">Activity Type:</label>
@@ -307,7 +289,6 @@
           <input type="text" id="description" placeholder="Enter Description" bind:value="{description}" class="form-control" />
         </div>
   
-        <!-- Optional image upload -->
         <div class="form-group">
           <label for="receipt">Attach Bill/Receipt (Optional):</label>
           <input type="file" id="receipt" accept="image/*" class="form-control" on:change="{handleImageUpload}" />
@@ -316,7 +297,7 @@
         <button class="btn-log" on:click={logActivity}>Log Activity</button>
       </div>
   
-      <!-- Success message -->
+
       {#if showMessage}
         <div class="success-message">
           Log has been saved! You can view it on the dashboard.
@@ -326,24 +307,22 @@
   {/if}
 
   {#if currentPage === 'entries'}
-  <!-- Previous Entries Page -->
   <section>
     <h2>Previous Financial Entries</h2>
 
-    <!-- Navigation for Previous/Next days -->
+    
     <div class="nav-buttons">
       <button on:click={prevDay} class="btn-nav">Previous Day</button>
       <span>{currentDateString}</span>
       <button on:click={nextDay} class="btn-nav">Next Day</button>
     </div>
 
-    <!-- Display entries for the selected day -->
+
     {#if selectedDayEntries.length > 0}
       <div class="entries-grid">
         {#each selectedDayEntries as entry, index}
           <div class="entry-tile">
             {#if editingEntry === index}
-              <!-- Edit mode for the entry -->
               <input type="text" bind:value={entry.description} class="form-control" placeholder="Description"/>
               <input type="number" bind:value={entry.amount} class="form-control" placeholder="Amount"/>
               <select bind:value={entry.type} class="form-control">
@@ -353,7 +332,6 @@
               </select>
               <button class="btn-save" on:click={() => saveEntry(index)}>Save</button>
             {:else}
-              <!-- Display mode for the entry -->
               <p><strong>{entry.type}</strong>: ${entry.amount}</p>
               <p>{entry.description}</p>
               <button class="btn-edit" on:click={() => editEntry(index)}>Edit</button>
@@ -372,7 +350,6 @@
   <section>
     <h2>Goals & Summary</h2>
 
-    <!-- Goal Setting Section -->
     <div class="goal-setting">
       <h3>Set Your Goals</h3>
       <div class="goal-entry">
@@ -386,7 +363,6 @@
       <button class="btn-save-goals" on:click={saveGoals}>Save Goals</button>
     </div>
 
-    <!-- Summary Section -->
     <div class="summary-section">
       <h3>Performance Overview</h3>
 
@@ -399,14 +375,13 @@
         </div>
       {/each}
 
-      <!-- Additional performance overview such as averages and frequency of logging -->
+      
       <h4>Overall Activity Summary</h4>
       <p>Total Activities Logged: {totalLogs}</p>
       <p>Average Expenses: ${averageExpenses}</p>
       <p>Average Savings: ${averageSavings}</p>
     </div>
 
-    <!-- Customization Section -->
     <div class="customization">
       <h3>Customize Activities</h3>
 
@@ -423,7 +398,6 @@
       <button class="btn-save-customization" on:click={saveCustomization}>Save Customization</button>
     </div>
 
-    <!-- Success Message -->
     {#if showSuccessMessage}
       <div class="success-message">
         Your goals and settings have been updated successfully!
@@ -433,11 +407,9 @@
   {/if}
 
   {#if currentPage === 'settings'}
-  <!-- Settings Page -->
   <section>
     <h2>Settings</h2>
 
-    <!-- Theme Toggle -->
     <div class="theme-toggle">
       <label for="themeSwitch">Toggle Theme</label>
       <input type="checkbox" id="themeSwitch" bind:checked={isDarkTheme} on:change={toggleTheme} />
@@ -557,7 +529,7 @@
     border-bottom: 2px solid #ddd;
     width: 100%;
   }
-    /* Center and style the log form */
+    
     .log-tile {
     background-color: white;
     padding: 20px;
@@ -570,16 +542,12 @@
     gap: 25px;
   }
 
-  /* Form Group for each input field */
+  
   .form-group {
     display: flex;
     flex-direction: column;
   }
 
-  /* General input field styling */
-
-
-  /* Button styling */
   .btn-log {
     background-color: #1db954;
     color: white;
